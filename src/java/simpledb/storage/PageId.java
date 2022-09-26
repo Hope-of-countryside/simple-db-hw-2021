@@ -1,10 +1,20 @@
+/*
+ * @Author: zyx 625762527@qq.com
+ * @Date: 2022-07-25 14:42:02
+ * @LastEditors: zyx 625762527@qq.com
+ * @LastEditTime: 2022-08-11 09:25:11
+ * @FilePath: /simple-db-hw-2021/src/java/simpledb/storage/PageId.java
+ * @Description: 
+ * 
+ * Copyright (c) 2022 by zyx 625762527@qq.com, All Rights Reserved. 
+ */
 package simpledb.storage;
 
 /** PageId is an interface to a specific page of a specific table. */
 public interface PageId {
 
     /** Return a representation of this page id object as a collection of
-        integers (used for logging)
+        integers (used for logging)`
 
         This class MUST have a constructor that accepts n integer parameters,
         where n is the number of integers returned in the array from serialize.
@@ -31,6 +41,6 @@ public interface PageId {
      */
     boolean equals(Object o);
 
-    int getPageNumber();
+    int getPageNo();
 }
 

@@ -1,3 +1,13 @@
+/*
+ * @Author: zyx 625762527@qq.com
+ * @Date: 2022-07-25 14:42:02
+ * @LastEditors: zyx 625762527@qq.com
+ * @LastEditTime: 2022-08-12 09:37:23
+ * @FilePath: /simple-db-hw-2021/src/java/simpledb/storage/DbFileIterator.java
+ * @Description: 
+ * 
+ * Copyright (c) 2022 by zyx 625762527@qq.com, All Rights Reserved. 
+ */
 package simpledb.storage;
 import simpledb.common.DbException;
 import simpledb.transaction.TransactionAbortedException;

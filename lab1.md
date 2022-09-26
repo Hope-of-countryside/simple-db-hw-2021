@@ -621,7 +621,11 @@ Suppose you have a data file, "some_data_file.txt", with the following contents:
 <p>
 You can convert this into a binary file that SimpleDB can query as follows:
 <p>
-```java -jar dist/simpledb.jar convert some_data_file.txt 3```
+
+```
+java -jar dist/simpledb.jar convert some_data_file.txt 3
+```
+
 <p>
 Here, the argument "3" tells conver that the input has 3 columns.
 <p>

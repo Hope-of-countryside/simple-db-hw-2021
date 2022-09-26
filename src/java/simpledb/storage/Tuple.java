@@ -1,8 +1,13 @@
 package simpledb.storage;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+
+import simpledb.common.Type;
+import simpledb.storage.TupleDesc.TDItem;
 
 /**
  * Tuple maintains information about the contents of a tuple. Tuples have a
@@ -12,16 +17,28 @@ import java.util.Iterator;
 public class Tuple implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private TupleDesc td;
+    private RecordId rid;
+    private ArrayList<Field> fields;
 
     /**
      * Create a new tuple with the specified schema (type).
      *
      * @param td
-     *            the schema of this tuple. It must be a valid TupleDesc
-     *            instance with at least one field.
+     *           the schema of this tuple. It must be a valid TupleDesc
+     *           instance with at least one field.
      */
     public Tuple(TupleDesc td) {
         // some code goes here
+        this.td = td;
+        this.fields = new ArrayList<>();
+        for (TDItem t : td.getTupleItems()) {
+            if (t.fieldType == Type.INT_TYPE) {
+                this.fields.add(new IntField(0));
+            } else if (t.fieldType == Type.STRING_TYPE) {
+                this.fields.add(new StringField("", 0));
+            }
+        }
     }
 
     /**
@@ -29,7 +46,7 @@ public class Tuple implements Serializable {
      */
     public TupleDesc getTupleDesc() {
         // some code goes here
-        return null;
+        return this.td;
     }
 
     /**
@@ -38,7 +55,7 @@ public class Tuple implements Serializable {
      */
     public RecordId getRecordId() {
         // some code goes here
-        return null;
+        return this.rid;
     }
 
     /**
@@ -49,29 +66,31 @@ public class Tuple implements Serializable {
      */
     public void setRecordId(RecordId rid) {
         // some code goes here
+        this.rid = rid;
     }
 
     /**
      * Change the value of the ith field of this tuple.
      *
      * @param i
-     *            index of the field to change. It must be a valid index.
+     *          index of the field to change. It must be a valid index.
      * @param f
-     *            new value for the field.
+     *          new value for the field.
      */
     public void setField(int i, Field f) {
         // some code goes here
+        this.fields.set(i, f);
     }
 
     /**
      * @return the value of the ith field, or null if it has not been set.
      *
      * @param i
-     *            field index to return. Must be a valid index.
+     *          field index to return. Must be a valid index.
      */
     public Field getField(int i) {
         // some code goes here
-        return null;
+        return this.fields.get(i);
     }
 
     /**
@@ -84,24 +103,35 @@ public class Tuple implements Serializable {
      */
     public String toString() {
         // some code goes here
-        throw new UnsupportedOperationException("Implement this");
+        StringBuilder sb = new StringBuilder();
+        for (Field f : this.fields) {
+            sb.append(f.toString()).append("\t");
+        }
+        return sb.toString().substring(0, sb.length() - 1);
+        // throw new UnsupportedOperationException("Implement this");
     }
 
     /**
      * @return
-     *        An iterator which iterates over all the fields of this tuple
-     * */
-    public Iterator<Field> fields()
-    {
+     *         An iterator which iterates over all the fields of this tuple
+     */
+    public Iterator<Field> fields() {
         // some code goes here
-        return null;
+        return this.fields.iterator();
     }
 
     /**
      * reset the TupleDesc of this tuple (only affecting the TupleDesc)
-     * */
-    public void resetTupleDesc(TupleDesc td)
-    {
+     */
+    public void resetTupleDesc(TupleDesc td) {
         // some code goes here
+        this.td = td;
+        for (TDItem t : td.getTupleItems()) {
+            if (t.fieldType == Type.INT_TYPE) {
+                this.fields.add(new IntField(0));
+            } else if (t.fieldType == Type.STRING_TYPE) {
+                this.fields.add(new StringField("", 0));
+            }
+        }
     }
 }

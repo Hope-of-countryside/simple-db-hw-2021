@@ -35,7 +35,7 @@ public interface DbFile {
 
     /**
      * Inserts the specified tuple to the file on behalf of transaction.
-     * This method will acquire a lock on the affected pages of the file, and
+        * This method will acquire a lock on the affected pages of the file, and
      * may block until the lock can be acquired.
      *
      * @param tid The transaction performing the update

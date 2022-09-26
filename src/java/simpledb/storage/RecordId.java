@@ -1,6 +1,17 @@
+/*
+ * @Author: zyx 625762527@qq.com
+ * @Date: 2022-07-25 14:42:02
+ * @LastEditors: zyx 625762527@qq.com
+ * @LastEditTime: 2022-08-06 14:51:01
+ * @FilePath: /simple-db-hw-2021/src/java/simpledb/storage/RecordId.java
+ * @Description: 
+ * 
+ * Copyright (c) 2022 by zyx 625762527@qq.com, All Rights Reserved. 
+ */
 package simpledb.storage;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * A RecordId is a reference to a specific tuple on a specific page of a
@@ -10,17 +21,22 @@ public class RecordId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private PageId pageId;
+    private int tupleNumber;
+
     /**
      * Creates a new RecordId referring to the specified PageId and tuple
      * number.
      * 
      * @param pid
-     *            the pageid of the page on which the tuple resides
+     *                the pageid of the page on which the tuple resides
      * @param tupleno
-     *            the tuple number within the page.
+     *                the tuple number within the page.
      */
     public RecordId(PageId pid, int tupleno) {
         // some code goes here
+        this.pageId = pid;
+        this.tupleNumber = tupleno;
     }
 
     /**
@@ -28,7 +44,7 @@ public class RecordId implements Serializable {
      */
     public int getTupleNumber() {
         // some code goes here
-        return 0;
+        return tupleNumber;
     }
 
     /**
@@ -36,7 +52,7 @@ public class RecordId implements Serializable {
      */
     public PageId getPageId() {
         // some code goes here
-        return null;
+        return pageId;
     }
 
     /**
@@ -48,7 +64,13 @@ public class RecordId implements Serializable {
     @Override
     public boolean equals(Object o) {
         // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        if (o == this)
+            return true;
+        if (o == null || o.getClass() != getClass())
+            return false;
+        RecordId recordId = (RecordId) o;
+        return recordId.pageId.equals(this.pageId) && recordId.tupleNumber == this.tupleNumber;
+        // throw new UnsupportedOperationException("implement this");
     }
 
     /**
@@ -60,7 +82,8 @@ public class RecordId implements Serializable {
     @Override
     public int hashCode() {
         // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        return Objects.hash(tupleNumber, pageId);
+        // throw new UnsupportedOperationException("implement this");
 
     }
 
