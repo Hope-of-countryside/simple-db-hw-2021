@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * The BufferPool is also responsible for locking; when a transaction fetches
  * a page, BufferPool checks that the transaction has the appropriate
  * locks to read/write the page.
- * 
+ *
  * @Threadsafe, all fields are final
  */
 public class BufferPool {
@@ -95,6 +95,7 @@ public class BufferPool {
                 if (pages.size() >= maxPages) {
                     throw new DbException("no free pages");
                 }
+
                 Page p = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
                 pages.put(pid, p);
                 return p;
@@ -152,7 +153,7 @@ public class BufferPool {
      * acquire a write lock on the page the tuple is added to and any other
      * pages that are updated (Lock acquisition is not needed for lab2).
      * May block if the lock(s) cannot be acquired.
-     * 
+     *
      * Marks any pages that were dirtied by the operation as dirty by calling
      * their markDirty bit, and adds versions of any pages that have
      * been dirtied to the cache (replacing any existing versions of those pages) so
@@ -203,7 +204,7 @@ public class BufferPool {
      * Needed by the recovery manager to ensure that the
      * buffer pool doesn't keep a rolled back page in its
      * cache.
-     * 
+     *
      * Also used by B+ tree files to ensure that deleted pages
      * are removed from the cache so they can be reused safely
      */
@@ -214,7 +215,7 @@ public class BufferPool {
 
     /**
      * Flushes a certain page to disk
-     * 
+     *
      * @param pid an ID indicating the page to flush
      */
     private synchronized void flushPage(PageId pid) throws IOException {

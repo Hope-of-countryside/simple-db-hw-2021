@@ -42,7 +42,7 @@ public class HeapPage implements Page {
      * <p>
      * ceiling(no. tuple slots / 8)
      * <p>
-     * 
+     *
      * @see Database#getCatalog
      * @see Catalog#getTupleDesc
      * @see BufferPool#getPageSize()
@@ -55,8 +55,8 @@ public class HeapPage implements Page {
 
         // allocate and read the header slots of this page
         header = new byte[getHeaderSize()];
-        System.out.printf("PageSize %d tupleSize %d numSlots %d headerSize %d\n", BufferPool.getPageSize(),
-                this.td.getSize(), this.numSlots, getHeaderSize());
+        //System.out.printf("PageSize %d tupleSize %d numSlots %d headerSize %d\n", BufferPool.getPageSize(),
+        //        this.td.getSize(), this.numSlots, getHeaderSize());
         for (int i = 0; i < header.length; i++)
             header[i] = dis.readByte();
 
@@ -75,7 +75,7 @@ public class HeapPage implements Page {
 
     /**
      * Retrieve the number of tuples on this page.
-     * 
+     *
      * @return the number of tuples on this page
      */
     private int getNumTuples() {
@@ -85,7 +85,7 @@ public class HeapPage implements Page {
     /**
      * Computes the number of bytes in the header of a page in a HeapFile with each
      * tuple occupying tupleSize bytes
-     * 
+     *
      * @return the number of bytes in the header of a page in a HeapFile with each
      *         tuple occupying tupleSize bytes
      */
@@ -254,7 +254,7 @@ public class HeapPage implements Page {
      * Delete the specified tuple from the page; the corresponding header bit should
      * be updated to reflect
      * that it is no longer stored on any page.
-     * 
+     *
      * @throws DbException if this tuple is not on this page, or tuple slot is
      *                     already empty.
      * @param t The tuple to delete
@@ -267,7 +267,7 @@ public class HeapPage implements Page {
     /**
      * Adds the specified tuple to the page; the tuple should be updated to reflect
      * that it is now stored on this page.
-     * 
+     *
      * @throws DbException if the page is full (no empty slots) or tupledesc
      *                     is mismatch.
      * @param t The tuple to add.

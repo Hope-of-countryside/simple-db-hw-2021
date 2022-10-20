@@ -1,6 +1,7 @@
 package simpledb.execution;
 
 import simpledb.storage.Tuple;
+import simpledb.storage.TupleDesc;
 import simpledb.storage.TupleIterator;
 
 import java.io.Serializable;
@@ -49,7 +50,7 @@ public interface Aggregator extends Serializable {
         public static Op getOp(int i) {
             return values()[i];
         }
-        
+
         public String toString()
         {
         	if (this==MIN)
@@ -84,5 +85,5 @@ public interface Aggregator extends Serializable {
      * @see TupleIterator for a possible helper
      */
     OpIterator iterator();
-    
+    TupleDesc getTupleDesc();
 }

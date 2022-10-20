@@ -4,13 +4,12 @@
  * @LastEditors: zyx 625762527@qq.com
  * @LastEditTime: 2022-09-25 17:00:12
  * @FilePath: /simple-db-hw-2021/src/java/simpledb/storage/HeapPageId.java
- * @Description: 
- * 
- * Copyright (c) 2022 by zyx 625762527@qq.com, All Rights Reserved. 
+ * @Description:
+ *
+ * Copyright (c) 2022 by zyx 625762527@qq.com, All Rights Reserved.
  */
 package simpledb.storage;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 /** Unique identifier for HeapPage objects. */
@@ -43,7 +42,7 @@ public class HeapPageId implements PageId {
      * @return the page number in the table getTableId() associated with
      *         this PageId
      */
-    public int getPageNo() {
+    public int getPageNumber() {
         // some code goes here
         return pgNo;
     }
@@ -88,7 +87,7 @@ public class HeapPageId implements PageId {
         int[] data = new int[2];
 
         data[0] = getTableId();
-        data[1] = getPageNo();
+        data[1] = getPageNumber();
 
         return data;
     }

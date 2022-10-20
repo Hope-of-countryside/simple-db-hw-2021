@@ -4,9 +4,9 @@
  * @LastEditors: zyx 625762527@qq.com
  * @LastEditTime: 2022-08-11 09:25:11
  * @FilePath: /simple-db-hw-2021/src/java/simpledb/storage/PageId.java
- * @Description: 
- * 
- * Copyright (c) 2022 by zyx 625762527@qq.com, All Rights Reserved. 
+ * @Description:
+ *
+ * Copyright (c) 2022 by zyx 625762527@qq.com, All Rights Reserved.
  */
 package simpledb.storage;
 
@@ -41,6 +41,6 @@ public interface PageId {
      */
     boolean equals(Object o);
 
-    int getPageNo();
+    int getPageNumber();
 }
 

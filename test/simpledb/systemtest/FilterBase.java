@@ -39,7 +39,7 @@ public abstract class FilterBase extends SimpleDbTestBase {
         Database.getBufferPool().transactionComplete(tid);
         return result;
     }
-
+    // 1 1 2 1
     private void validatePredicate(int column, int columnValue, int trueValue, int falseValue,
             Predicate.Op operation) throws IOException, DbException, TransactionAbortedException {
         // Test the true value

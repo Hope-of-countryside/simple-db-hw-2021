@@ -140,7 +140,7 @@ public class LogFile {
     public synchronized int getTotalRecords() {
         return totalRecords;
     }
-    
+
     /** Write an abort record to the log for the specified tid, force
         the log to disk, and perform a rollback
         @param tid The aborting transaction.
@@ -545,11 +545,11 @@ public class LogFile {
                     Page after = readPageData(raf);
 
                     System.out.println(start + ": before image table id " + before.getId().getTableId());
-                    System.out.println((start + INT_SIZE) + ": before image page number " + before.getId().getPageNo());
+                    System.out.println((start + INT_SIZE) + ": before image page number " + before.getId().getPageNumber());
                     System.out.println((start + INT_SIZE) + " TO " + (middle - INT_SIZE) + ": page data");
 
                     System.out.println(middle + ": after image table id " + after.getId().getTableId());
-                    System.out.println((middle + INT_SIZE) + ": after image page number " + after.getId().getPageNo());
+                    System.out.println((middle + INT_SIZE) + ": after image page number " + after.getId().getPageNumber());
                     System.out.println((middle + INT_SIZE) + " TO " + (raf.getFilePointer()) + ": page data");
 
                     System.out.println(raf.getFilePointer() + ": RECORD START OFFSET: " + raf.readLong());

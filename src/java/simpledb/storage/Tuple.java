@@ -42,6 +42,20 @@ public class Tuple implements Serializable {
     }
 
     /**
+     * merge tuples into one tuple
+     * @param tps
+     */
+    public Tuple(Tuple... tps) {
+        TupleDesc[] descs = new TupleDesc[tps.length];
+        fields = new ArrayList<>();
+        for(int i = 0; i < tps.length; i++) {
+            fields.addAll(tps[i].fields);
+            descs[i] = tps[i].getTupleDesc();
+        }
+        td = new TupleDesc(descs);
+    }
+
+    /**
      * @return The TupleDesc representing the schema of this tuple.
      */
     public TupleDesc getTupleDesc() {
@@ -134,4 +148,5 @@ public class Tuple implements Serializable {
             }
         }
     }
+
 }
