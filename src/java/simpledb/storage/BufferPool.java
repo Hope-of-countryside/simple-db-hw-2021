@@ -93,7 +93,7 @@ public class BufferPool {
     try {
       lock.lock();
       if (pages.containsKey(pid)) {
-        System.out.println("page"+pid + " is in buffer pool");
+//        System.out.println("page"+pid + " is in buffer pool");
         return pages.get(pid);
       } else {
         if (pages.size() >= maxPages) {
@@ -102,7 +102,7 @@ public class BufferPool {
 
         Page p = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
         pages.put(pid, p);
-        System.out.println("page"+ pid +" is not in buffer pool");
+//        System.out.println("page"+ pid +" is not in buffer pool");
         return p;
       }
     } finally {
