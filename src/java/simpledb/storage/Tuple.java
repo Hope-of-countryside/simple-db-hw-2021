@@ -118,10 +118,11 @@ public class Tuple implements Serializable {
     public String toString() {
         // some code goes here
         StringBuilder sb = new StringBuilder();
+        sb.append("recordId: ").append(this.getRecordId().toString()).append("\t");
         for (Field f : this.fields) {
             sb.append(f.toString()).append("\t");
         }
-        return sb.toString().substring(0, sb.length() - 1);
+        return sb.substring(0, sb.length() - 1);
         // throw new UnsupportedOperationException("Implement this");
     }
 
@@ -147,6 +148,10 @@ public class Tuple implements Serializable {
                 this.fields.add(new StringField("", 0));
             }
         }
+    }
+
+    public Boolean equals(Tuple t){
+        return this.rid.equals(t.rid);
     }
 
 }

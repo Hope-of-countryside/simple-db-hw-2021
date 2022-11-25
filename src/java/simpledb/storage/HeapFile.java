@@ -1,7 +1,9 @@
 package simpledb.storage;
 
+import javax.xml.crypto.Data;
 import simpledb.common.Database;
 import simpledb.common.DbException;
+import simpledb.common.Permissions;
 import simpledb.transaction.TransactionAbortedException;
 import simpledb.transaction.TransactionId;
 
@@ -24,7 +26,7 @@ public class HeapFile implements DbFile {
   private TupleDesc td;
   private int tableId;
   // private HashMap<PageId, Page> pages;
-  private ReentrantLock lock;
+  private ReentrantLock lock; //file lock
 
   /**
    * Constructs a heap file backed by the specified file.
@@ -108,8 +110,14 @@ public class HeapFile implements DbFile {
 
   // see DbFile.java for javadocs
   public void writePage(Page page) throws IOException {
-    // some code goes here
-    // not necessary for lab1
+
+    try (RandomAccessFile raf = new RandomAccessFile(this.file, "rw")) {
+      lock.lock();
+      raf.seek((long) page.getId().getPageNumber() * BufferPool.getPageSize());
+      raf.write(page.getPageData());
+    } finally {
+      lock.unlock();
+    }
   }
 
   /**
@@ -123,24 +131,47 @@ public class HeapFile implements DbFile {
   // see DbFile.java for javadocs
   public List<Page> insertTuple(TransactionId tid, Tuple t)
       throws DbException, IOException, TransactionAbortedException {
-    // some code goes here
-    return null;
-    // not necessary for lab1
+    //System.out.println("start insertTuple");
+    // find a page having empty slots
+    for (int i = 0; i < numPages(); i++) {
+      HeapPage hp = (HeapPage) Database.getBufferPool()
+          .getPage(tid, new HeapPageId(this.tableId, i), Permissions.READ_WRITE);
+      if (hp.getNumEmptySlots() != 0) {
+        //System.out.println("find empty page: " + hp);
+        hp.insertTuple(t);
+        return List.of(hp);
+      }
+    }
+    // if no page having empty slots, create a page and write page
+    HeapPageId newHpid = new HeapPageId(this.tableId, numPages());
+    HeapPage newHp = new HeapPage(newHpid, HeapPage.createEmptyPageData());
+    newHp.insertTuple(t);
+    Database.getBufferPool().addPage(newHp, newHpid);
+    writePage(newHp);
+    //System.out.println("create new page : " + newHp + "and insert tuple: " + t);
+    return List.of(newHp);
   }
 
   // see DbFile.java for javadocs
-  public ArrayList<Page> deleteTuple(TransactionId tid, Tuple t) throws DbException,
-      TransactionAbortedException {
-    // some code goes here
-    return null;
-    // not necessary for lab1
+  public ArrayList<Page> deleteTuple(TransactionId tid, Tuple t)
+      throws DbException, TransactionAbortedException {
+    HeapPage hp = (HeapPage) Database.getBufferPool()
+        .getPage(tid, t.getRecordId().getPageId(), Permissions.READ_WRITE);
+    //System.out.printf("delete tuple, heap page: %s\n", hp.toString());
+    hp.deleteTuple(t);
+    return new ArrayList<Page>() {{
+      add(hp);
+    }};
   }
 
   // see DbFile.java for javadocs
   public DbFileIterator iterator(TransactionId tid) {
     // some code goes here
-    return new HeapFileIterator(this.tableId,
-        (int) Math.ceil((float) this.file.length() / BufferPool.getPageSize()));
+    return new HeapFileIterator(this.tableId, numPages());
+  }
+
+  public String toString() {
+    return "tableId: " + this.tableId + "file: " + this.file.toString();
   }
 }
 
@@ -159,8 +190,7 @@ class HeapFileIterator extends AbstractDbFileIterator {
     this.maxPageNumber = maxPageNumber;
   }
 
-  @Override
-  public void open() throws DbException, TransactionAbortedException {
+  @Override public void open() throws DbException, TransactionAbortedException {
     open = true;
     currentPageNumber = 0;
     currentPageId = new HeapPageId(tableId, currentPageNumber);
@@ -173,8 +203,7 @@ class HeapFileIterator extends AbstractDbFileIterator {
     currentIterator = currentPage.iterator();
   }
 
-  @Override
-  public void rewind() throws DbException, TransactionAbortedException {
+  @Override public void rewind() throws DbException, TransactionAbortedException {
     open = true;
     currentPageNumber = 0;
     currentPageId = new HeapPageId(tableId, currentPageNumber);
@@ -187,8 +216,7 @@ class HeapFileIterator extends AbstractDbFileIterator {
     currentIterator = currentPage.iterator();
   }
 
-  @Override
-  protected Tuple readNext() throws DbException, TransactionAbortedException {
+  @Override protected Tuple readNext() throws DbException, TransactionAbortedException {
     // not open
     if (!open) {
       throw new IllegalStateException();
@@ -226,8 +254,7 @@ class HeapFileIterator extends AbstractDbFileIterator {
     return readNext();
   }
 
-  @Override
-  public void close() {
+  @Override public void close() {
     super.close();
     open = false;
   }

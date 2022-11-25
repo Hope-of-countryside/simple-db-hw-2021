@@ -9,6 +9,8 @@ import simpledb.transaction.TransactionId;
 import java.util.*;
 import java.io.*;
 
+import static simpledb.util.StringUtils.convertByteToHexadecimal;
+
 /**
  * Each instance of HeapPage stores data for one page of HeapFiles and
  * implements the Page interface that is used by BufferPool.
@@ -27,6 +29,12 @@ public class HeapPage implements Page {
 
     byte[] oldData;
     private final Byte oldDataLock = (byte) 0;
+
+    private final Byte RWPageLock = (byte) 0;
+
+    private TransactionId lastestTransactionId = null;
+
+    private Boolean dirty = false;
 
     /**
      * Create a HeapPage from a set of bytes of data read from disk.
@@ -55,8 +63,6 @@ public class HeapPage implements Page {
 
         // allocate and read the header slots of this page
         header = new byte[getHeaderSize()];
-        //System.out.printf("PageSize %d tupleSize %d numSlots %d headerSize %d\n", BufferPool.getPageSize(),
-        //        this.td.getSize(), this.numSlots, getHeaderSize());
         for (int i = 0; i < header.length; i++)
             header[i] = dis.readByte();
 
@@ -260,8 +266,19 @@ public class HeapPage implements Page {
      * @param t The tuple to delete
      */
     public void deleteTuple(Tuple t) throws DbException {
-        // some code goes here
-        // not necessary for lab1
+      synchronized (RWPageLock) {
+        for (int i = 0; i < getNumTuples(); i++) {
+          if (this.tuples[i] != null && this.tuples[i].equals(t)) {
+            if (!isSlotUsed(i)) {
+              throw new DbException("already deleted");
+            }
+            this.tuples[i] = null;
+            markSlotUsed(i, false);
+            return;
+          }
+        }
+      }
+      throw new DbException("not found tuple");
     }
 
     /**
@@ -273,8 +290,21 @@ public class HeapPage implements Page {
      * @param t The tuple to add.
      */
     public void insertTuple(Tuple t) throws DbException {
-        // some code goes here
-        // not necessary for lab1
+        if (!t.getTupleDesc().equals(this.td) || this.getNumEmptySlots() == 0){
+            throw new DbException("tuple desc not equal or have no empty slots");
+        }
+        synchronized (RWPageLock){
+            for (int i = 0; i < getNumTuples(); i++) {
+                if (!isSlotUsed(i)){
+                    markSlotUsed(i, true);
+                    t.setRecordId(new RecordId(this.pid, i));
+                    tuples[i] = t;
+                    return;
+                }
+            }
+        }
+
+        throw new DbException("insert tuple failed");
     }
 
     /**
@@ -282,8 +312,13 @@ public class HeapPage implements Page {
      * that did the dirtying
      */
     public void markDirty(boolean dirty, TransactionId tid) {
-        // some code goes here
-        // not necessary for lab1
+        if (dirty) {
+            lastestTransactionId = tid;
+            this.dirty = true;
+        }else {
+            lastestTransactionId = null;
+            this.dirty = false;
+        }
     }
 
     /**
@@ -291,9 +326,12 @@ public class HeapPage implements Page {
      * the page is not dirty
      */
     public TransactionId isDirty() {
-        // some code goes here
-        // Not necessary for lab1
-        return null;
+        if (this.dirty) {
+          return lastestTransactionId;
+        } else {
+          return null;
+        }
+
     }
 
     /**
@@ -322,8 +360,16 @@ public class HeapPage implements Page {
      * Abstraction to fill or clear a slot on this page.
      */
     private void markSlotUsed(int i, boolean value) {
-        // some code goes here
-        // not necessary for lab1
+        //System.out.printf("markSlotUsed i: %d, value: %b\n", i, value);
+      byte a = (byte) (1 << (i % 8));
+        //System.out.printf("a: %x, before header: %x\n", a, header[i / 8]);
+      if (value){
+        header[i / 8] = (byte)(header[i / 8] | a);
+      } else {
+        header[i / 8] = (byte)(header[i / 8] - a);
+      }
+        //System.out.printf("after header: %x\n",header[i / 8]);
+        //System.out.println();
     }
 
     /**
@@ -340,4 +386,11 @@ public class HeapPage implements Page {
         }
         return ts.iterator();
     }
+
+    public String toString(){
+        return "pageid: " + this.pid.toString() + "header: "
+            + convertByteToHexadecimal(this.header) + "\t";
+    }
+
+
 }
