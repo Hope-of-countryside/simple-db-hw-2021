@@ -1,17 +1,15 @@
 package simpledb.storage;
 
-import java.util.List;
+import java.util.*;
+
 import simpledb.common.Database;
 import simpledb.common.Permissions;
 import simpledb.common.DbException;
-import simpledb.common.DeadlockException;
 import simpledb.transaction.TransactionAbortedException;
 import simpledb.transaction.TransactionId;
+import simpledb.util.LRU;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -44,7 +42,9 @@ public class BufferPool {
 
   private ReentrantLock lock;
 
-  private HashMap<PageId, Page> pages;
+//  private HashMap<PageId, Page> pages;
+  private LRU<PageId, Page> pages;
+
 
   /**
    * Creates a BufferPool that caches up to numPages pages.
@@ -54,7 +54,7 @@ public class BufferPool {
   public BufferPool(int numPages) {
     // some code goes here
     maxPages = numPages;
-    pages = new HashMap<>();
+    pages = new LRU<>(maxPages);
     lock = new ReentrantLock();
   }
 
@@ -93,12 +93,9 @@ public class BufferPool {
     try {
       lock.lock();
       if (pages.containsKey(pid)) {
-//        System.out.println("page"+pid + " is in buffer pool");
+//        System.out.println("page" + pid + " is in buffer pool");
         return pages.get(pid);
       } else {
-        if (pages.size() >= maxPages) {
-          throw new DbException("no free pages");
-        }
 
         Page p = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
         pages.put(pid, p);
@@ -177,7 +174,6 @@ public class BufferPool {
   public void insertTuple(TransactionId tid, int tableId, Tuple t)
       throws DbException, IOException, TransactionAbortedException {
     DbFile dbFile = Database.getCatalog().getDatabaseFile(tableId);
-    //System.out.println("file: " + dbFile.toString() + "type: " + dbFile.getClass());
     List<Page> insertResult = dbFile.insertTuple(tid, t);
     for (Page p : insertResult) {
       // to pass BufferPoolWriteTest
@@ -207,6 +203,9 @@ public class BufferPool {
     DbFile dbFile = Database.getCatalog().getDatabaseFile(page.getId().getTableId());
     //System.out.println("database file: " + dbFile.toString());
     List<Page> deleteResult = dbFile.deleteTuple(tid, t);
+    for (Page page1 : deleteResult){
+      flushPage(page1.getId());
+    }
   }
 
   /**
@@ -215,9 +214,11 @@ public class BufferPool {
    * break simpledb if running in NO STEAL mode.
    */
   public synchronized void flushAllPages() throws IOException {
-    // some code goes here
-    // not necessary for lab1
-
+    for (Iterator<Page> it = pages.iterator3(); it.hasNext(); ) {
+      Page page = it.next();
+      flushPage(page.getId());
+      page.markDirty(false, null);
+    }
   }
 
   /**
@@ -232,6 +233,7 @@ public class BufferPool {
   public synchronized void discardPage(PageId pid) {
     // some code goes here
     // not necessary for lab1
+      pages.remove(pid);
   }
 
   /**
@@ -241,6 +243,9 @@ public class BufferPool {
    */
   private synchronized void flushPage(PageId pid) throws IOException {
     Page page = this.pages.get(pid);
+    if (page == null) {
+        throw new IOException("this page is not in memory");
+    }
     DbFile file = Database.getCatalog().getDatabaseFile(pid.getTableId());
     file.writePage(page);
   }
@@ -260,5 +265,11 @@ public class BufferPool {
   private synchronized void evictPage() throws DbException {
     // some code goes here
     // not necessary for lab1
+    try {
+      flushPage(pages.nextEvictElement().getId());
+      pages.evict();
+    } catch (IOException e) {
+      throw new DbException(e.getMessage());
+    }
   }
 }
