@@ -87,10 +87,16 @@ public interface DbFile {
      * @return an ID uniquely identifying this HeapFile.
      */
     int getId();
-    
+
     /**
      * Returns the TupleDesc of the table stored in this DbFile.
      * @return TupleDesc of this DbFile.
      */
     TupleDesc getTupleDesc();
+
+    /**
+     * Returns total page counts of this file
+     * @return
+     */
+    int numPages();
 }
