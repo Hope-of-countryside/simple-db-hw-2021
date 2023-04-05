@@ -1,12 +1,6 @@
 package simpledb.systemtest;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.util.Collections;
-
 import org.junit.Test;
-
 import simpledb.common.Database;
 import simpledb.common.DbException;
 import simpledb.common.Utility;
@@ -15,6 +9,11 @@ import simpledb.execution.SeqScan;
 import simpledb.storage.*;
 import simpledb.transaction.Transaction;
 import simpledb.transaction.TransactionAbortedException;
+
+import java.io.IOException;
+import java.util.Collections;
+
+import static org.junit.Assert.*;
 
 public class AbortEvictionTest extends SimpleDbTestBase {
     // Note: This is a direct copy of the EvictTest method,
@@ -66,8 +65,8 @@ public class AbortEvictionTest extends SimpleDbTestBase {
     @Test public void testDoNotEvictDirtyPages()
             throws IOException, DbException, TransactionAbortedException {
         // Allocate a file with ~10 pages of data
-        HeapFile f = SystemTestUtil.createRandomHeapFile(2, 512*10, null, null);
         Database.resetBufferPool(2);
+        HeapFile f = SystemTestUtil.createRandomHeapFile(2, 512*10, null, null);
 
         // BEGIN TRANSACTION
         Transaction t = new Transaction();
@@ -81,7 +80,6 @@ public class AbortEvictionTest extends SimpleDbTestBase {
         assertTrue(found);
         // ABORT
         t.transactionComplete(true);
-
         // A second transaction must not find the tuple
         t = new Transaction();
         t.start();

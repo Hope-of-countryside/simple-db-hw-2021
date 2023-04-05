@@ -1,17 +1,6 @@
 package simpledb.systemtest;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.Test;
-
 import simpledb.common.Database;
 import simpledb.common.DbException;
 import simpledb.execution.Delete;
@@ -23,7 +12,18 @@ import simpledb.transaction.Transaction;
 import simpledb.transaction.TransactionAbortedException;
 import simpledb.transaction.TransactionId;
 
-import static org.junit.Assert.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Tests running concurrent transactions.
@@ -156,31 +156,32 @@ public class TransactionTest extends SimpleDbTestBase {
                 // Store exception for the master thread to handle
                 exception = e;
             }
-            
+
             try {
                 latch.notParticipating();
             } catch (InterruptedException | BrokenBarrierException e) {
                 throw new RuntimeException(e);
             }
             completed = true;
+            System.out.println("Xtester finished");
         }
     }
-    
+
     private static class ModifiableCyclicBarrier {
         private CountDownLatch awaitLatch;
         private CyclicBarrier participationLatch;
         private AtomicInteger nextParticipants;
-        
+
         public ModifiableCyclicBarrier(int parties) {
             reset(parties);
         }
-        
+
         private void reset(int parties) {
             nextParticipants = new AtomicInteger(0);
             awaitLatch = new CountDownLatch(parties);
             participationLatch = new CyclicBarrier(parties, new UpdateLatch(this, nextParticipants));
         }
-        
+
         public void await() throws InterruptedException {
             awaitLatch.countDown();
             awaitLatch.await();
@@ -198,7 +199,7 @@ public class TransactionTest extends SimpleDbTestBase {
         private static class UpdateLatch implements Runnable {
             final ModifiableCyclicBarrier latch;
             final AtomicInteger nextParticipants;
-            
+
             public UpdateLatch(ModifiableCyclicBarrier latch, AtomicInteger nextParticipants) {
                 this.latch = latch;
                 this.nextParticipants = nextParticipants;
@@ -210,10 +211,10 @@ public class TransactionTest extends SimpleDbTestBase {
                 if (participants > 0) {
                     latch.reset(participants);
                 }
-            }           
+            }
         }
     }
-    
+
     @Test public void testSingleThread()
             throws IOException, DbException, TransactionAbortedException {
         validateTransactions(1);
@@ -228,7 +229,7 @@ public class TransactionTest extends SimpleDbTestBase {
             throws IOException, DbException, TransactionAbortedException {
         validateTransactions(5);
     }
-    
+
     @Test public void testTenThreads()
     throws IOException, DbException, TransactionAbortedException {
         validateTransactions(10);
@@ -237,8 +238,8 @@ public class TransactionTest extends SimpleDbTestBase {
     @Test public void testAllDirtyFails()
             throws IOException, DbException, TransactionAbortedException {
         // Allocate a file with ~10 pages of data
-        HeapFile f = SystemTestUtil.createRandomHeapFile(2, 512*10, null, null);
         Database.resetBufferPool(1);
+        HeapFile f = SystemTestUtil.createRandomHeapFile(2, 512*10, null, null);
 
         // BEGIN TRANSACTION
         Transaction t = new Transaction();
