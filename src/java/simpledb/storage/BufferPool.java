@@ -351,7 +351,7 @@ public class BufferPool {
         }
 
         public void getLock(TransactionId tid, PageId pid, Permissions perm) throws TransactionAbortedException {
-            System.out.println("pageIdToLockNode: " + pageIdToLockNode);
+//            System.out.println("pageIdToLockNode: " + pageIdToLockNode);
 //            System.out.println("get lock tid " + tid + " pid " + pid + " perm " + perm);
             locksForPage.computeIfAbsent(pid, k -> new Object());
             synchronized (locksForPage.get(pid)) {
@@ -386,6 +386,9 @@ public class BufferPool {
         }
 
         public void refreshPageLock(PageId pid) {
+            if (locksForPage.get(pid) == null) {
+                return;
+            }
             synchronized (locksForPage.get(pid)) {
                 pageIdToLockNode.remove(pid);
             }
